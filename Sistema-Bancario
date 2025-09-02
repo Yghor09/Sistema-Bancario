@@ -1,0 +1,92 @@
+CREATE DATABASE sistema_bancario;
+USE sistema_bancario;
+
+CREATE TABLE BANCO (
+    Codigo INT PRIMARY KEY,
+    Nome VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE AGENCIA (
+    Numero_agencia INT PRIMARY KEY,
+    Endereco VARCHAR(255) NOT NULL,
+    Cod_banco INT,
+    FOREIGN KEY (Cod_banco) REFERENCES BANCO(Codigo) ON DELETE CASCADE
+);
+
+CREATE TABLE CLIENTE (
+    Cpf_cliente CHAR(14) PRIMARY KEY,
+    Nome VARCHAR(100) NOT NULL,
+    Sexo CHAR(1) CHECK (Sexo IN ('M', 'F')),
+    Endereco VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE CONTA (
+    Numero_conta INT PRIMARY KEY,
+    Saldo DECIMAL(10,2) NOT NULL,
+    Tipo_conta INT CHECK (Tipo_conta IN (1,2)),
+    Num_agencia INT,
+    FOREIGN KEY (Num_agencia) REFERENCES AGENCIA(Numero_agencia) ON DELETE CASCADE
+);
+
+CREATE TABLE HISTORICO (
+    Cpf CHAR(14),
+    Num_conta INT,
+    Data_inicio DATE,
+    PRIMARY KEY (Cpf, Num_conta),
+    FOREIGN KEY (Cpf) REFERENCES CLIENTE(Cpf_cliente) ON DELETE CASCADE,
+    FOREIGN KEY (Num_conta) REFERENCES CONTA(Numero_conta) ON DELETE CASCADE
+);
+
+CREATE TABLE TELEFONE_CLIENTE (
+    Cpf_cli CHAR(14),
+    Telefone_cli VARCHAR(15),
+    PRIMARY KEY (Cpf_cli, Telefone_cli),
+    FOREIGN KEY (Cpf_cli) REFERENCES CLIENTE(Cpf_cliente) ON DELETE CASCADE
+);
+
+INSERT INTO BANCO (Codigo, Nome) VALUES
+(1, 'Banco do Brasil'),
+(4, 'CEF');
+
+INSERT INTO AGENCIA (Numero_agencia, Endereco, Cod_banco) VALUES
+(322, 'Av. Walfredo Macedo Brandao, 1139', 4),
+(1253, 'R. Bancário Sérgio Guerra, 17', 1);
+
+INSERT INTO CLIENTE (Cpf_cliente, Nome, Sexo, Endereco) VALUES
+('111.222.333-44', 'Bruna Andrade', 'F', 'Rua José Firmino Ferreira, 1050'),
+('666.777.888-99', 'Radegondes Silva', 'M', 'Av. Epitácio Pessoa, 1008'),
+('555.444.777-33', 'Miguel Xavier', 'M', 'Rua Bancário Sérgio Guerra, 17');
+
+INSERT INTO CONTA (Numero_conta, Saldo, Tipo_conta, Num_agencia) VALUES
+(11765, 22745.05, 2, 322),
+(21010, 3100.96, 1, 1253);
+
+INSERT INTO HISTORICO (Cpf, Num_conta, Data_inicio) VALUES
+('111.222.333-44', 11765, '2015-10-23'),
+('666.777.888-99', 11765, '2016-10-25'),
+('555.444.777-33', 21010, '2016-10-25');
+
+INSERT INTO TELEFONE_CLIENTE (Cpf_cli, Telefone_cli) VALUES
+('111.222.333-44', '(83) 3223-1122'),
+('666.777.888-99', '(83) 99443-9999'),
+('666.777.888-99', '(83) 3233-2267');
+
+ALTER TABLE CLIENTE ADD COLUMN Pais CHAR(3) DEFAULT 'BRA';
+
+ALTER TABLE CLIENTE ADD COLUMN Email VARCHAR(255);
+
+ALTER TABLE HISTORICO DROP FOREIGN KEY historico_ibfk_2;
+
+ALTER TABLE CONTA MODIFY Numero_conta CHAR(7);
+
+ALTER TABLE HISTORICO MODIFY Num_conta CHAR(7);
+
+ALTER TABLE HISTORICO ADD CONSTRAINT historico_ibfk_2 FOREIGN KEY (Num_conta) REFERENCES CONTA(Numero_conta) ON DELETE CASCADE;
+
+UPDATE CLIENTE SET Email = 'radegondes.silva@gmail.com' WHERE Nome = 'Radegondes Silva';
+
+UPDATE CONTA SET Saldo = Saldo * 1.10 WHERE Numero_conta = '21010-7';
+
+UPDATE CLIENTE SET Nome = 'Gabriel Alves De Macedo' WHERE Nome = 'Bruna Andrade';
+
+SET SQL_SAFE_UPDATES = 0;  
